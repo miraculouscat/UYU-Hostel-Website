@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = ""
+}
+
+model Staff {
+  id        Int     @id @default(autoincrement())
+  username  String  @unique
+  password  String
+  role      String  @default("user") @db.VarChar(255)
+  nik       String? @unique
+  name      String
+  address   String?
+  email     String? @unique
+  phone     String? @unique
+  is_deleted      Boolean? @default(false)
+  maintenances Maintenance[]
+
+  @@map(name: "staff")
+}
+
+model Room {
+  id              Int     @id
+  is_flagged      Boolean @default(false)
+  maintenances Maintenance[]
+
+  @@map(name: "room")
+}
+
+model Maintenance {
+  id          Int     @id @default(autoincrement())
+  room_id     Int?
+  staff_id    Int?
+  status      String  @default("pending") @db.VarChar(255)
+  description String
+  reports Report[]
+
+  room Room? @relation(fields: [room_id], references: [id])
+  staff Staff? @relation(fields: [staff_id], references: [id])
+
+  @@map(name: "maintenance")
+}
+
+model Report {
+  id              Int     @id @default(autoincrement())
+  created_at      DateTime @default(now())
+  maintenance_id  Int?
+  description     String
+  further_action  String @default("-")
+  is_deleted      Boolean? @default(false)
+
+  maintenance Maintenance? @relation(fields: [maintenance_id], references: [id])
+
+  @@map(name: "report")
+}
